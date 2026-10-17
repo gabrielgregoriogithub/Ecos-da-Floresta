@@ -237,6 +237,14 @@ window.addEventListener('keydown',e=>{
   document.head.appendChild(chipStyle);
   setInterval(()=>{if(!activeBlessing||!p||state!=='play'){blessingChip.hidden=true;return}blessingChip.hidden=false;blessingChip.textContent=activeBlessing.icon+' '+activeBlessing.name},300);
   const touchActions=document.querySelector('.actions');
+  const touchDevice=()=>{try{return matchMedia('(pointer:coarse)').matches}catch{return false}};
+  const haptic=pattern=>{if(touchDevice()&&navigator.vibrate)navigator.vibrate(pattern)};
+  const touchSword=sword;sword=()=>{const ready=atkcd<=0;touchSword();if(ready&&atkcd>0)haptic(8)};
+  const touchMagic=magic;magic=()=>{const ready=magiccd<=0&&p?.mana>0;touchMagic();if(ready&&magiccd>0)haptic(12)};
+  const touchRoll=roll;roll=()=>{const ready=dashcd<=0;touchRoll();if(ready&&dashcd>0)haptic(16)};
+  const touchBomb=bomb;bomb=()=>{const ready=p?.bombs>0&&bombs.length===0;touchBomb();if(ready&&bombs.length)haptic([12,24,12])};
+  const touchSpecial=special;special=()=>{const ready=charge>=100;touchSpecial();if(ready&&charge===0)haptic([18,30,18])};
+  const touchHurt=hurt;hurt=()=>{const before=p?.hp||0;touchHurt();if(p&&p.hp<before)haptic([20,35,20])};
   if(touchActions){
     const addMobileButton=(label,title,handler)=>{const b=document.createElement('button');b.type='button';b.className='mobile-extra';b.textContent=label;b.setAttribute('aria-label',title);b.title=title;b.addEventListener('pointerdown',e=>{e.preventDefault();handler()});touchActions.appendChild(b)};
     addMobileButton('Ⅱ','Pausar aventura',()=>pause());
