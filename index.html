@@ -155,6 +155,7 @@ window.addEventListener('keydown',e=>{
   document.head.appendChild(comboStyle);
   setInterval(()=>{const active=state==='play'&&comboTime>0&&attack>0;comboMeter.hidden=!active;if(active){comboMeter.querySelector('span').textContent='COMBO x'+(combo+1)+(combo===2?' · GOLPE APRIMORADO':'');comboMeter.querySelector('i').style.width=Math.min(100,comboTime/.85*100)+'%'}},80);
   const visualStyle=document.createElement('style');
+  const favicon=document.createElement('link');favicon.rel='icon';favicon.type='image/svg+xml';favicon.href='favicon.svg';document.head.appendChild(favicon);
   visualStyle.textContent=`
     :root{--forest-ink:#081510;--forest-glass:#102820d9;--forest-gold:#e2c77c;--forest-mint:#9ed9bb}
     body{background:radial-gradient(circle at 50% -15%,#1e4939 0,#0c211a 42%,#060f0d 100%);background-attachment:fixed}
