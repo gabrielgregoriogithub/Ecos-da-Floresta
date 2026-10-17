@@ -237,6 +237,7 @@ window.addEventListener('keydown',e=>{
       ctx.save();ctx.globalAlpha=.22;ctx.strokeStyle=aura;ctx.lineWidth=2;
       ctx.beginPath();ctx.arc(p.x,p.y,22*pulse,phase,phase+4.8);ctx.stroke();
       ctx.globalAlpha=.1;ctx.fillStyle=aura;ctx.beginPath();ctx.arc(p.x,p.y,18*pulse,0,Math.PI*2);ctx.fill();ctx.restore();
+      ctx.save();ctx.fillStyle=aura;for(let i=0;i<4;i++){const a=phase*(.55+i*.08)+i*1.57,rad=20+Math.sin(t*3+i)*5;ctx.globalAlpha=.28;circle(p.x+Math.cos(a)*rad,p.y+Math.sin(a)*rad,1.5+(i%2),aura)}ctx.restore();
     }
     baseDrawHero();
   };
