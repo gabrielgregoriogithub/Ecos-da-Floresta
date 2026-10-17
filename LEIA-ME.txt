@@ -1,0 +1,52 @@
+ECOS DA FLORESTA — JOGO COMPLETO
+Versão exportada em 17/10/2026, com mapa e passagens secretas.
+
+COMO JOGAR
+1. Extraia TODO o ZIP para uma pasta no computador.
+2. Abra index.html no Chrome, Edge ou Firefox.
+   No Windows, você também pode clicar em Abrir-Jogo.bat.
+3. Escolha sua arma, dificuldade e comece a aventura.
+
+O arquivo index.html funciona sem internet e inclui toda a lógica,
+desenhos, animações e sons sintetizados. Não precisa instalar engine,
+baixar assets ou executar um build. Fontes locais substituem as fontes web.
+
+Se o navegador limitar o salvamento ao abrir um arquivo diretamente,
+execute iniciar-servidor.py com Python 3 instalado. Ele abre o jogo
+usando um servidor restrito ao seu próprio computador (127.0.0.1).
+O servidor usa a porta fixa 8765 para manter o mesmo endereço local
+e permitir retomar o progresso no mesmo navegador. Se a porta estiver
+ocupada, encerre outra instância do servidor antes de tentar novamente.
+
+CONTROLES
+WASD ou setas: mover | Mouse: mirar | J ou clique: atacar
+K ou botão direito: magia | Espaço: esquivar | L: bomba
+Q: especial | E: interagir | I: atributos | M: mapa
+P: pausar | F: tela cheia
+No celular/tablet: joystick e botões na tela.
+
+CONTEÚDO
+- index.html: jogo completo, preparado para jogar offline.
+- Abrir-Jogo.bat: atalho para abrir o jogo no Windows.
+- iniciar-servidor.py: servidor local opcional (Python 3).
+- codigo-fonte/dist/index.html: código original da versão publicada.
+  Neste original, somente as fontes tipográficas vêm do Google Fonts;
+  o jogo continua funcionando sem elas.
+- codigo-fonte/tests/smoke.cjs: testes de lógica (Node.js).
+- arquivos-sha256.json: hashes para verificar a integridade dos arquivos.
+
+PARA EDITAR
+Abra index.html em um editor como VS Code. HTML, CSS e JavaScript estão
+no mesmo arquivo. Os gráficos são desenhados em Canvas 2D e os sons
+usam Web Audio. Não há dependências npm nem assets externos de gameplay.
+Para testar o código original: entre em codigo-fonte e execute
+node tests/smoke.cjs (requer Node.js).
+
+SALVAMENTO
+Histórico, ecos, companheiro e jornada são salvos no navegador.
+Os dados do link online não são transferidos automaticamente para esta
+cópia. Limpar os dados do navegador pode apagar o progresso local.
+
+VERIFICAÇÃO
+Testes de lógica incluídos passaram durante a exportação.
+A apresentação visual e os controles não foram validados num navegador.
