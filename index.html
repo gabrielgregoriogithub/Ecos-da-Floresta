@@ -236,6 +236,16 @@ window.addEventListener('keydown',e=>{
   chipStyle.textContent='#blessing-chip{position:absolute;right:16px;top:47px;padding:4px 9px;border:1px solid #b9d29b55;border-radius:10px;background:#102c22cc;color:#dce6b6;font:10px system-ui;letter-spacing:.4px;box-shadow:0 4px 14px #0005;pointer-events:none;backdrop-filter:blur(4px)}#blessing-chip[hidden]{display:none}@media(max-width:600px){#blessing-chip{right:8px;top:43px;font-size:8px;padding:3px 6px}}';
   document.head.appendChild(chipStyle);
   setInterval(()=>{if(!activeBlessing||!p||state!=='play'){blessingChip.hidden=true;return}blessingChip.hidden=false;blessingChip.textContent=activeBlessing.icon+' '+activeBlessing.name},300);
+  const touchActions=document.querySelector('.actions');
+  if(touchActions){
+    const addMobileButton=(label,title,handler)=>{const b=document.createElement('button');b.type='button';b.className='mobile-extra';b.textContent=label;b.setAttribute('aria-label',title);b.title=title;b.addEventListener('pointerdown',e=>{e.preventDefault();handler()});touchActions.appendChild(b)};
+    addMobileButton('Ⅱ','Pausar aventura',()=>pause());
+    addMobileButton('⌗','Abrir mapa',()=>showMap());
+    addMobileButton('⛶','Tela cheia',()=>{const game=document.querySelector('.game');if(!document.fullscreenElement)game?.requestFullscreen?.();else document.exitFullscreen?.()});
+  }
+  const mobileStyle=document.createElement('style');
+  mobileStyle.textContent='@media(max-width:800px){body{overscroll-behavior:none}.touch{display:grid;grid-template-columns:122px 1fr;gap:10px;align-items:center;padding:12px 10px;touch-action:none;user-select:none}.touch .actions{display:grid;grid-template-columns:repeat(4,minmax(42px,1fr));gap:6px;max-width:none}.touch .actions button{min-width:0!important;min-height:48px!important;width:100%;padding:7px;border-radius:10px;font-size:16px}.touch .actions [data-key="j"]{grid-column:span 2;min-height:54px!important;font-size:21px}.touch .actions .mobile-extra{background:linear-gradient(145deg,#294a3c,#1b332a);color:#dce4bd;font-size:15px}.touch .actions button:focus-visible{outline:2px solid #dce6b6;outline-offset:2px}}@media(max-width:390px){.touch{grid-template-columns:102px 1fr;gap:7px;padding:9px 6px}.touch .actions{gap:4px}.touch .actions button{min-height:43px!important;padding:4px;font-size:14px}.touch .actions [data-key="j"]{min-height:49px!important}}';
+  document.head.appendChild(mobileStyle);
   const baseDrawHero=drawHero;
   drawHero=()=>{
     if(p&&activeBlessing&&!reducedFX){
