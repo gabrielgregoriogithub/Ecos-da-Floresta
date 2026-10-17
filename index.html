@@ -217,11 +217,18 @@ window.addEventListener('keydown',e=>{
   equipWeapon=(i)=>{
     equipped=i;resetInput();state='blessing';$('overlay').classList.remove('hide');
     $('overlay').innerHTML='<div style="width:600px;max-width:100%"><div class="rune">✦</div><div class="eyebrow">UM PACTO PARA A JORNADA</div><h2>Escolha sua bênção</h2><p>Uma raiz antiga caminhará com você nesta tentativa.<br>Escolha o poder que define sua próxima build.</p><div class="choices blessing-choices">'+blessings.map((b,n)=>'<button class="blessing-card" onclick="chooseBlessing('+n+')"><span class="blessing-icon">'+b.icon+'</span><b>'+b.name+'</b><small>'+b.desc+'</small></button>').join('')+'</div><p style="font-size:10px;margin-top:18px">A bênção permanece apenas nesta aventura.</p></div>';
+    const synergyPreview=[['Coração de Musgo','Casca protetora · +1 escudo inicial'],['Brasa Ancestral','Ponta incandescente · magia perfurante'],['Passo do Vento','Dança cortante · +10% crítico']];
+    const synergyIndex=equipped===0?0:equipped===1?1:2;
+    const preview=$('overlay').querySelectorAll('.blessing-card')[synergyIndex];
+    if(preview){const note=document.createElement('em');note.textContent='✦ '+synergyPreview[synergyIndex][1];note.className='synergy-preview';preview.appendChild(note);preview.classList.add('synergy-match');}
   };
   window.chooseBlessing=(i)=>{if(state!=='blessing')return;activeBlessing=blessings[i]||blessings[0];baseStart();activeBlessing.apply();relics.unshift(activeBlessing.name);let synergy='';if(activeBlessing.name==='Coração de Musgo'&&equipped===0){p.shield=1;synergy='Casca protetora · +1 escudo inicial';relics.unshift(synergy)}if(activeBlessing.name==='Brasa Ancestral'&&equipped===1){p.arcane=(p.arcane||0)+1;synergy='Ponta incandescente · magia perfurante';relics.unshift(synergy)}if(activeBlessing.name==='Passo do Vento'&&equipped===2){p.crit=(p.crit||0)+.1;synergy='Dança cortante · +10% crítico';relics.unshift(synergy)}state='play';$('overlay').classList.add('hide');toast(synergy||activeBlessing.name+' despertou em você.');hud()};
   const blessingStyle=document.createElement('style');
   blessingStyle.textContent='.blessing-choices{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.blessing-card{min-height:155px!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;background:linear-gradient(145deg,#224b3a,#132b22);color:#e8ddb5;border:1px solid #b8c98244}.blessing-card:hover{border-color:#e4ce7b;background:linear-gradient(145deg,#315d43,#19352a)}.blessing-card b{font:500 15px Georgia;color:#f0dca0}.blessing-card small{color:#abc0ad;line-height:1.5}.blessing-icon{font-size:34px;color:#e5c879;filter:drop-shadow(0 0 8px #e5c87966)}@media(max-width:600px){.blessing-choices{grid-template-columns:1fr;gap:7px}.blessing-card{min-height:75px!important;display:grid;grid-template-columns:42px 1fr;text-align:left;padding:9px 12px}.blessing-icon{grid-row:span 2;text-align:center}.blessing-card b{font-size:13px}.blessing-card small{font-size:10px}}';
   document.head.appendChild(blessingStyle);
+  const synergyStyle=document.createElement('style');
+  synergyStyle.textContent='.blessing-card.synergy-match{border-color:#e6cb7388;box-shadow:0 0 18px #d9bd6c22,inset 0 1px #fff2ad44}.synergy-preview{display:block;color:#e4d28d;font-size:9px;line-height:1.35;font-style:normal;margin-top:3px}';
+  document.head.appendChild(synergyStyle);
   const blessingChip=document.createElement('div');
   blessingChip.id='blessing-chip';blessingChip.hidden=true;blessingChip.setAttribute('role','status');blessingChip.setAttribute('aria-live','polite');
   document.querySelector('.game')?.appendChild(blessingChip);
