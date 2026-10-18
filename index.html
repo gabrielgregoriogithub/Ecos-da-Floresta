@@ -372,6 +372,22 @@ window.addEventListener('keydown',e=>{
   const baseToggleSound=toggleSound;toggleSound=()=>{baseToggleSound();try{localStorage.ecosSound=sound?'1':'0'}catch{}};
   let autoPausedByVisibility=false;
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='play'){autoPausedByVisibility=true;pause()}else if(!document.hidden&&autoPausedByVisibility&&state==='pause'){autoPausedByVisibility=false;pause();toast('Aventura retomada.')}});
+  let gamepadWasConnected=false,gamepadButtons=[];
+  const readGamepad=()=>{
+    const gp=navigator.getGamepads?.().find(Boolean);
+    if(!gp){if(gamepadWasConnected){gamepadWasConnected=false;if(!joy.id){joy.active=false;joy.x=0;joy.y=0}}return}
+    if(!gamepadWasConnected){gamepadWasConnected=true;toast('Controle conectado · A para atacar · B para magia');}
+    const dead=.18,rawX=gp.axes?.[0]||0,rawY=gp.axes?.[1]||0,mag=Math.hypot(rawX,rawY);
+    if(mag>dead){joy.active=true;joy.id='gamepad';joy.x=Math.max(-1,Math.min(1,rawX));joy.y=Math.max(-1,Math.min(1,rawY));touchMode=false}
+    else if(joy.id==='gamepad'){joy.active=false;joy.id=null;joy.x=0;joy.y=0}
+    const pressed=i=>!!gp.buttons?.[i]?.pressed,edge=i=>pressed(i)&&!gamepadButtons[i];
+    if(edge(0))sword();if(edge(1))magic();if(edge(2))roll();if(edge(3))special();if(edge(4))interact();if(edge(5))bomb();if(edge(9))pause();
+    gamepadButtons=gp.buttons?.map(b=>!!b.pressed)||[];
+  };
+  const baseGamepadUpdate=update;
+  update=dt=>{readGamepad();baseGamepadUpdate(dt)};
+  const padHint=document.createElement('span');padHint.innerHTML='<kbd>Controle</kbd> A atacar · B magia · X esquiva · Y especial';document.querySelector('.below')?.appendChild(padHint);
+  const gamepadStyle=document.createElement('style');gamepadStyle.textContent='.below span{white-space:nowrap}@media(max-width:800px){.below span:last-child{display:none}}';document.head.appendChild(gamepadStyle);
   apply();
 })();
 </script>

@@ -23,6 +23,7 @@ WASD ou setas: mover | Mouse: mirar | J ou clique: atacar
 K ou botão direito: magia | Espaço: esquivar | L: bomba
 Q: especial | E: interagir | I: atributos | M: mapa
 P: pausar | F: tela cheia | R: Pulso da Floresta
+Controle: A atacar | B magia | X esquiva | Y especial | LB bomba | RB pausar
 No celular/tablet: joystick e botões na tela.
 
 CONTEÚDO
