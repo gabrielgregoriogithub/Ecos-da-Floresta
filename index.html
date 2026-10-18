@@ -354,6 +354,24 @@ window.addEventListener('keydown',e=>{
   const dailyStyle=document.createElement('style');
   dailyStyle.textContent='#dailyChallenge button{cursor:pointer}#dailyChallenge button:hover{filter:brightness(1.12)}@media(max-width:600px){#dailyChallenge{margin-top:10px!important;padding:8px!important}#dailyChallenge b{font-size:12px!important}#dailyChallenge small{font-size:9px}}';
   document.head.appendChild(dailyStyle);
+  const saveKeys=['ecosEchoes','ecosHeritage','ecosHistory','ecosHighScore','ecosGuideDone','ecosFamiliar','ecosReducedFX','ecosAccessibility','ecosCheckpoint','ecosSound'];
+  window.exportProgress=()=>{
+    const data={};for(const key of saveKeys){try{if(localStorage.getItem(key)!==null)data[key]=localStorage.getItem(key)}catch{}}
+    const blob=new Blob([JSON.stringify({app:'ecos-da-floresta',version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='ecos-da-floresta-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Backup exportado para este dispositivo.');
+  };
+  window.importProgress=()=>{
+    const input=document.createElement('input');input.type='file';input.accept='application/json,.json';
+    input.onchange=()=>{const file=input.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const pack=JSON.parse(reader.result);if(pack?.app!=='ecos-da-floresta'||pack?.version!==1||!pack.data)throw Error('invalid');for(const key of saveKeys)if(Object.prototype.hasOwnProperty.call(pack.data,key))localStorage.setItem(key,String(pack.data[key]));alert('Backup restaurado. O jogo será recarregado.');location.reload()}catch{alert('Não foi possível restaurar este backup.')}};reader.readAsText(file)};input.click();
+  };
+  const backupStyle=document.createElement('style');
+  backupStyle.textContent='.backup-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.backup-actions button{padding:7px 10px;background:#20382e;color:#c1d2bd;font-size:10px}@media(max-width:800px){.backup-actions{display:none}}';document.head.appendChild(backupStyle);
+  const backupBox=document.createElement('div');backupBox.className='backup-actions';backupBox.innerHTML='<button type="button" aria-label="Exportar progresso" title="Salvar um backup do progresso">⇩ Backup</button><button type="button" aria-label="Restaurar progresso" title="Restaurar um backup salvo">⇧ Restaurar</button>';
+  backupBox.children[0].onclick=exportProgress;backupBox.children[1].onclick=importProgress;document.querySelector('.side .panel:last-child')?.appendChild(backupBox);
+  try{sound=localStorage.ecosSound==='1';if($('sound'))$('sound').textContent=sound?'♫ Som ligado':'♫ Som desligado'}catch{}
+  const baseToggleSound=toggleSound;toggleSound=()=>{baseToggleSound();try{localStorage.ecosSound=sound?'1':'0'}catch{}};
+  let autoPausedByVisibility=false;
+  document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='play'){autoPausedByVisibility=true;pause()}else if(!document.hidden&&autoPausedByVisibility&&state==='pause'){autoPausedByVisibility=false;pause();toast('Aventura retomada.')}});
   apply();
 })();
 </script>
