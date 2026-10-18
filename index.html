@@ -424,6 +424,42 @@ window.addEventListener('keydown',e=>{
     }
     ctx.restore();
   };
+  const atmosphereDraw=draw;
+  draw=()=>{
+    atmosphereDraw();
+    if(reducedFX||!p)return;
+    ctx.save();
+    ctx.globalCompositeOperation='source-over';
+    if(river){
+      ctx.globalAlpha=.22;ctx.strokeStyle=biome===1?'#c2d8ff':'#8de0cc';ctx.lineWidth=1.5;
+      for(let i=0;i<11;i++){const y=232+i*6+Math.sin(t*2+i)*2;const start=(t*36+i*79)%820-26;ctx.beginPath();ctx.moveTo(start,y);ctx.quadraticCurveTo(start+24,y-3,start+52,y);ctx.stroke()}
+      ctx.globalAlpha=.09;ctx.fillStyle='#b9f3df';ctx.fillRect(0,225,768,80);
+    }
+    if(biome===0){
+      ctx.shadowBlur=12;ctx.shadowColor='#d8ed9b';ctx.fillStyle='#d9eea0';
+      for(let i=0;i<13;i++){const x=(i*191+Math.sin(t*.3+i)*50)%750+9,y=92+(i*67+t*(8+i%2))%330;ctx.globalAlpha=.25+.2*Math.sin(t*2+i);ctx.beginPath();ctx.arc(x,y,1.5+(i%2),0,Math.PI*2);ctx.fill()}
+    }else if(biome===1){
+      ctx.shadowBlur=0;ctx.strokeStyle='#b8d4ee55';ctx.lineWidth=1;
+      for(let i=0;i<32;i++){const x=(i*47+t*48)%820-25,y=(i*83+t*125)%430+55;ctx.globalAlpha=.12+(i%3)*.035;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-5,y+13);ctx.stroke()}
+      ctx.globalAlpha=.1;ctx.fillStyle='#b7c8ef';for(let i=0;i<6;i++){const x=95+i*117,y=430-(i%2)*8;ctx.beginPath();ctx.ellipse(x,y,26,4,0,0,Math.PI*2);ctx.fill()}
+    }else{
+      ctx.shadowBlur=9;ctx.shadowColor='#f0b76d';ctx.fillStyle='#f2bd79';
+      for(let i=0;i<15;i++){const x=(i*137+t*(15+i%4))%780-6,y=90+(i*53+t*(20+i%3))%340;ctx.globalAlpha=.16+.12*Math.sin(t*3+i);ctx.beginPath();ctx.arc(x,y,1+(i%3),0,Math.PI*2);ctx.fill()}
+    }
+    ctx.shadowBlur=0;
+    // Moldura de folhagem sutil: dá ao cenário uma leitura de diorama.
+    ctx.globalAlpha=.16;ctx.strokeStyle=biome===2?'#e3b977':'#9fc78b';ctx.lineWidth=2;
+    for(let i=0;i<7;i++){const x=34+i*118+Math.sin(t*.4+i)*3;ctx.beginPath();ctx.moveTo(x,18);ctx.quadraticCurveTo(x-12,34,x-3,49);ctx.stroke();ctx.beginPath();ctx.moveTo(x+4,18);ctx.quadraticCurveTo(x+15,31,x+7,43);ctx.stroke()}
+    ctx.restore();
+  };
+  const polishStyle=document.createElement('style');
+  polishStyle.textContent=`
+    .visual-premium .overlay{opacity:1;transition:opacity .24s ease,transform .24s ease}
+    .visual-premium .overlay.hide{display:flex;opacity:0;pointer-events:none;transform:scale(1.018)}
+    .visual-premium #toast{filter:drop-shadow(0 0 8px #e8cd7b66)}
+    .visual-premium canvas{border-radius:inherit}
+    .visual-premium .cooldowns>div{box-shadow:inset 0 1px #fff1,0 4px 12px #0003}
+  `;document.head.appendChild(polishStyle);
   apply();
 })();
 </script>
