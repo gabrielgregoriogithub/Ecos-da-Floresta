@@ -324,6 +324,36 @@ window.addEventListener('keydown',e=>{
   const style=document.createElement('style');
   style.textContent=':focus-visible{outline:2px solid #f4d98a;outline-offset:3px}.accessibility-contrast{background:#050b09;color:#fffdf0}.accessibility-contrast p,.accessibility-contrast small,.accessibility-contrast .muted,.accessibility-contrast .below,.accessibility-contrast .stat{color:#d8eadc}.accessibility-contrast .panel,.accessibility-contrast .game{border-color:#d9e8b866;background:#0b2119}.accessibility-contrast button{border:1px solid #f1d98c;color:#07140e}.accessibility-contrast kbd{border-color:#d9e8b8;color:#fffde5}.accessibility-large{font-size:112%}.accessibility-large p{font-size:15px}.accessibility-large small,.accessibility-large .below,.accessibility-large .stat{font-size:13px}.accessibility-large .hud{font-size:14px}@media(max-width:800px){.accessibility-large{font-size:106%}.accessibility-large .below{font-size:11px}}';
   document.head.appendChild(style);
+  const dailyChallenges=[
+    {name:'Lua de Espinhos',desc:'-1 vida máxima · inimigos +20%',hp:-1,enemy:1.2},
+    {name:'Caminho Faminto',desc:'Baús dão menos cristais · inimigos +12% fortes',hp:0,enemy:1.12},
+    {name:'Brasa Fria',desc:'Inimigos +8% fortes · comece com uma bomba extra',hp:0,enemy:1.08,bomb:1}
+  ];
+  const dayIndex=Math.floor(Date.now()/86400000)%dailyChallenges.length;
+  const daily=dailyChallenges[dayIndex];
+  let dailyEnabled=false;
+  const baseSelectWeapon=selectWeapon;
+  selectWeapon=()=>{
+    baseSelectWeapon();
+    const root=$('overlay')?.firstElementChild;
+    if(!root||root.querySelector('#dailyChallenge'))return;
+    const card=document.createElement('div');card.id='dailyChallenge';card.style.cssText='margin:16px auto 0;max-width:520px;padding:10px 12px;border:1px solid #d7bd7455;border-radius:8px;background:#172f24;text-align:left';
+    card.innerHTML='<div style="display:flex;align-items:center;gap:10px"><span style="font-size:22px;color:#e8cd7f">✦</span><div style="flex:1"><b style="display:block;color:#ead493;font:500 13px Georgia">Desafio do dia · '+daily.name+'</b><small style="display:block;margin-top:4px;color:#aac2ad">'+daily.desc+'</small></div><button id="dailyToggle" type="button" style="padding:8px 10px;background:'+(dailyEnabled?'#d8bd78':'#294539')+';color:'+(dailyEnabled?'#15261d':'#e4d5ad')+'">'+(dailyEnabled?'Ativo':'Opcional')+'</button></div>';
+    root.appendChild(card);
+    card.querySelector('#dailyToggle').onclick=()=>{dailyEnabled=!dailyEnabled;selectWeapon()};
+  };
+  const baseStart=start;
+  start=()=>{
+    baseStart();
+    if(!dailyEnabled||!p)return;
+    p.max=Math.max(2,p.max+daily.hp);p.hp=Math.min(p.hp,p.max);
+    for(const e of enemies){e.hp=Math.max(1,Math.ceil(e.hp*daily.enemy));e.max=e.hp}
+    if(daily.bomb)p.bombs+=daily.bomb;
+    hud();toast('Desafio do dia: '+daily.name+' · '+daily.desc);
+  };
+  const dailyStyle=document.createElement('style');
+  dailyStyle.textContent='#dailyChallenge button{cursor:pointer}#dailyChallenge button:hover{filter:brightness(1.12)}@media(max-width:600px){#dailyChallenge{margin-top:10px!important;padding:8px!important}#dailyChallenge b{font-size:12px!important}#dailyChallenge small{font-size:9px}}';
+  document.head.appendChild(dailyStyle);
   apply();
 })();
 </script>
