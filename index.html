@@ -460,6 +460,61 @@ window.addEventListener('keydown',e=>{
     .visual-premium canvas{border-radius:inherit}
     .visual-premium .cooldowns>div{box-shadow:inset 0 1px #fff1,0 4px 12px #0003}
   `;document.head.appendChild(polishStyle);
+  // Expansão de conteúdo: criatura errante e flores de memória em salas intermediárias.
+  let memoryBloom=null;
+  const expansionLoadRoom=loadRoom;
+  loadRoom=()=>{
+    expansionLoadRoom();
+    memoryBloom=null;
+    if([2,5,7].includes(room)&&route!=='shop'&&route!=='rest'&&room!==8){
+      const spots={2:{x:188,y:330},5:{x:586,y:350},7:{x:210,y:150}};
+      memoryBloom={...spots[room],claimed:false,pulse:Math.random()*Math.PI*2};
+      let hunter={x:room===5?570:room===7?560:210,y:room===5?135:room===7?135:160,r:15,hp:Math.ceil((4+room)*difficulties[difficulty].hp),max:Math.ceil((4+room)*difficulties[difficulty].hp),type:6,cd:1.8,riftCd:1.4,phase:Math.random()*6};
+      if(solid(hunter.x,hunter.y,hunter.r)){hunter.x=384;hunter.y=145}
+      enemies.push(hunter);
+      toast('Uma presença antiga ronda a clareira.');
+    }
+  };
+  const expansionInteract=interact;
+  interact=()=>{
+    if(state==='play'&&memoryBloom&&!memoryBloom.claimed&&dist(p,memoryBloom)<48){
+      memoryBloom.claimed=true;const heal=Math.min(p.max,p.hp+2);p.hp=heal;p.mana=Math.min(p.maxmana,p.mana+2);charge=Math.min(100,charge+20);gold+=2;
+      burst(memoryBloom.x,memoryBloom.y,'#c6f0a2',42);texts.push({x:memoryBloom.x-34,y:memoryBloom.y-28,text:'MEMÓRIA DESPERTA',col:'#d9f1ad',life:1.4});toast('Flor de memória: +2 vida · +2 magia · +20% carga');hud();return;
+    }
+    expansionInteract();
+  };
+  const expansionObjective=updateObjective;
+  updateObjective=()=>{
+    expansionObjective();
+    if(state==='play'&&memoryBloom&&!memoryBloom.claimed&&dist(p,memoryBloom)<62){$('objective').textContent='E · Despertar a flor de memória';lastObjective='E · Despertar a flor de memória'}
+  };
+  const expansionUpdate=update;
+  update=dt=>{
+    expansionUpdate(dt);
+    if(state!=='play')return;
+    for(const e of enemies){
+      if(e.dead||e.type!==6)continue;
+      e.phase=(e.phase||0)+dt;e.riftCd-=dt;
+      const orbit=Math.atan2(p.y-e.y,p.x-e.x)+Math.sin(e.phase*1.6)*.9;
+      move(e,Math.cos(orbit)*19*dt,Math.sin(orbit)*19*dt);
+      if(e.riftCd<=0){
+        const aimAngle=Math.atan2(p.y-e.y,p.x-e.x);
+        for(let i=-1;i<=1;i++){const a=aimAngle+i*.23;shots.push({x:e.x,y:e.y,vx:Math.cos(a)*145,vy:Math.sin(a)*145,r:6,life:3.2,rift:true,friendly:false})}
+        burst(e.x,e.y,'#c8a8ff',16);e.riftCd=2.8;
+      }
+    }
+  };
+  const expansionDraw=draw;
+  draw=()=>{
+    expansionDraw();
+    if(reducedFX)return;
+    ctx.save();
+    if(memoryBloom&&!memoryBloom.claimed){
+      const pulse=1+Math.sin(t*3+memoryBloom.pulse)*.1;ctx.globalCompositeOperation='screen';ctx.globalAlpha=.18;ctx.fillStyle='#bfe897';ctx.shadowBlur=18;ctx.shadowColor='#bfe897';ctx.beginPath();ctx.arc(memoryBloom.x,memoryBloom.y,25*pulse,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.globalAlpha=.9;ctx.strokeStyle='#d8efa5';ctx.lineWidth=2;for(let i=0;i<5;i++){const a=t*.7+i*1.25;ctx.beginPath();ctx.moveTo(memoryBloom.x,memoryBloom.y);ctx.lineTo(memoryBloom.x+Math.cos(a)*18*pulse,memoryBloom.y+Math.sin(a)*18*pulse);ctx.stroke()}ctx.fillStyle='#e7f6b9';ctx.font='9px system-ui';ctx.textAlign='center';ctx.fillText('FLOR DE MEMÓRIA',memoryBloom.x,memoryBloom.y-27);ctx.textAlign='left';
+    }
+    for(const e of enemies){if(e.dead||e.type!==6)continue;const ready=e.riftCd<.75;ctx.globalAlpha=.55+.2*Math.sin(t*5+e.phase);ctx.globalCompositeOperation='screen';ctx.strokeStyle=ready?'#f0b2d8':'#b9a8f1';ctx.lineWidth=ready?3:2;ctx.beginPath();ctx.arc(e.x,e.y,e.r+10+Math.sin(t*4)*3,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#dfc9ff';ctx.beginPath();ctx.moveTo(e.x,e.y-e.r-8);ctx.lineTo(e.x+7,e.y);ctx.lineTo(e.x,e.y+e.r+8);ctx.lineTo(e.x-7,e.y);ctx.closePath();ctx.fill();if(ready){ctx.globalAlpha=.28;ctx.strokeStyle='#f6c6dd';ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.lineTo(p.x,p.y);ctx.stroke()}ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;ctx.fillStyle='#eadcff';ctx.font='9px system-ui';ctx.textAlign='center';ctx.fillText('NÔMADE',e.x,e.y-e.r-18);ctx.textAlign='left'}
+    ctx.restore();
+  };
   apply();
 })();
 </script>
