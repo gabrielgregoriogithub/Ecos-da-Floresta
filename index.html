@@ -515,6 +515,49 @@ window.addEventListener('keydown',e=>{
     for(const e of enemies){if(e.dead||e.type!==6)continue;const ready=e.riftCd<.75;ctx.globalAlpha=.55+.2*Math.sin(t*5+e.phase);ctx.globalCompositeOperation='screen';ctx.strokeStyle=ready?'#f0b2d8':'#b9a8f1';ctx.lineWidth=ready?3:2;ctx.beginPath();ctx.arc(e.x,e.y,e.r+10+Math.sin(t*4)*3,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#dfc9ff';ctx.beginPath();ctx.moveTo(e.x,e.y-e.r-8);ctx.lineTo(e.x+7,e.y);ctx.lineTo(e.x,e.y+e.r+8);ctx.lineTo(e.x-7,e.y);ctx.closePath();ctx.fill();if(ready){ctx.globalAlpha=.28;ctx.strokeStyle='#f6c6dd';ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.lineTo(p.x,p.y);ctx.stroke()}ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;ctx.fillStyle='#eadcff';ctx.font='9px system-ui';ctx.textAlign='center';ctx.fillText('NÔMADE',e.x,e.y-e.r-18);ctx.textAlign='left'}
     ctx.restore();
   };
+  let expeditionMode=false,tideCooldown=0;
+  const expeditionLoadRoom=loadRoom;
+  loadRoom=()=>{
+    expeditionLoadRoom();
+    if(!expeditionMode||room<9)return;
+    biome=2;layoutName=room===9?'Santuário Submerso':'Câmara do Farol';river=room===9;blocks=blocks.filter(b=>b.y<210||b.y>325);
+    const warden={x:room===9?550:384,y:room===9?170:170,r:20,hp:Math.ceil((12+room)*difficulties[difficulty].hp),max:Math.ceil((12+room)*difficulties[difficulty].hp),type:7,cd:1.8,tideCd:1.2,phase:Math.random()*6};
+    if(room===10){blocks=[];for(const x of [150,260,508,618])for(const y of [150,365])blocks.push({x,y,r:22})}
+    enemies.push(warden);toast(room===9?'Expedição · Santuário Submerso':'Expedição · Câmara do Farol');hud();
+  };
+  const expeditionHud=hud;
+  hud=()=>{expeditionHud();if(expeditionMode){$('room').textContent='EXPEDIÇÃO · '+room+' / 10';$('hint').textContent=room===9?'Atravesse as águas e desperte a maré ancestral.':'Derrote o Guardião do Farol para concluir a expedição.'}};
+  const expeditionChoose=choose;
+  choose=()=>{if(expeditionMode&&room>=10){finish(true);return}expeditionChoose()};
+  const expeditionFinish=finish;
+  finish=win=>{
+    expeditionFinish(win);
+    if(win&&expeditionMode){expeditionMode=false;return}
+    if(win&&!expeditionMode&&state==='end'){
+      const choices=$('overlay').querySelector('.choices');
+      if(choices&&!choices.querySelector('[data-expedition]')){const b=document.createElement('button');b.dataset.expedition='1';b.textContent='Expedição ao Santuário →';b.style.cssText='background:#294c55;color:#d6f1e8';b.onclick=startExpedition;choices.appendChild(b)}
+    }
+  };
+  window.startExpedition=()=>{
+    if(!p||state!=='end')return;expeditionMode=true;room=8;route='expedition';pendingRoute='expedition';gate=false;earned=true;tideCooldown=0;p.hp=p.max;p.mana=p.maxmana;p.shield=Math.max(p.shield||0,1);loadRoom();state='play';$('overlay').classList.add('hide');hud();toast('A maré antiga abriu um caminho além do ciclo.');
+  };
+  const tideStep=()=>{
+    if(!expeditionMode||state!=='play'||tideCooldown>0||!p||p.mana<1)return;
+    p.mana--;tideCooldown=6;dash=.28;inv=Math.max(inv,.38);for(const e of enemies)if(!e.dead&&dist(e,p)<86)hit(e,4+p.power,'direct');burst(p.x,p.y,'#8ed9d0',48);texts.push({x:p.x-30,y:p.y-28,text:'PASSO DA MARÉ',col:'#b9f4e7',life:1});toast('Passo da Maré · avanço protegido');hud();
+  };
+  window.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='t'&&!e.repeat)tideStep()});
+  addMobileButton('≈','Passo da Maré',tideStep);
+  const expeditionUpdate=update;
+  update=dt=>{
+    tideCooldown=Math.max(0,tideCooldown-dt);expeditionUpdate(dt);if(state!=='play'||!expeditionMode)return;
+    for(const e of enemies){if(e.dead||e.type!==7)continue;e.phase=(e.phase||0)+dt;e.tideCd-=dt;if(e.tideCd<=0){const a=Math.atan2(p.y-e.y,p.x-e.x);for(let i=0;i<8;i++){const q=a+i*Math.PI/4;shots.push({x:e.x,y:e.y,vx:Math.cos(q)*118,vy:Math.sin(q)*118,r:7,life:4,tide:true,friendly:false})}burst(e.x,e.y,'#8ed9d0',24);e.tideCd=3.4}if(e.hp<e.max*.5&&!e.enraged){e.enraged=true;e.tideCd=.5;toast('O Guardião do Farol chama a maré!')}}
+  };
+  const expeditionDraw=draw;
+  draw=()=>{
+    expeditionDraw();if(!expeditionMode||reducedFX)return;ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=.12;ctx.fillStyle='#65d8ce';for(let i=0;i<10;i++){const x=75+i*72,y=120+(i%4)*84+Math.sin(t*1.2+i)*8;ctx.beginPath();ctx.arc(x,y,18+Math.sin(t+i)*5,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=.45;ctx.strokeStyle='#9ee9dd';ctx.lineWidth=2;for(let i=0;i<6;i++){const x=88+i*124;ctx.beginPath();ctx.moveTo(x,410);ctx.quadraticCurveTo(x+18,350,x+4,300);ctx.quadraticCurveTo(x-10,255,x+10,205);ctx.stroke()}for(const e of enemies){if(e.dead||e.type!==7)continue;ctx.globalAlpha=.7+.2*Math.sin(t*4);ctx.strokeStyle=e.enraged?'#f0b56e':'#88e1d8';ctx.lineWidth=e.enraged?4:2;ctx.beginPath();ctx.arc(e.x,e.y,e.r+12+Math.sin(t*3)*3,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#d3fff1';ctx.font='9px system-ui';ctx.textAlign='center';ctx.fillText('GUARDIÃO DO FAROL',e.x,e.y-e.r-18)}ctx.restore();
+  };
+  const expeditionCooldowns=updateCooldowns;
+  updateCooldowns=()=>{expeditionCooldowns();const box=$('cooldowns');if(!box||!expeditionMode)return;let chip=box.querySelector('[data-tide-cooldown]');if(!chip){chip=document.createElement('div');chip.dataset.tideCooldown='1';chip.innerHTML='<kbd>T</kbd><span>Maré<small></small></span>';box.appendChild(chip)}chip.className=tideCooldown<=0&&p?.mana>0?'ready':'';chip.querySelector('small').textContent=p?.mana<1?'Sem mana':tideCooldown<=0?'Pronto':tideCooldown.toFixed(1)+'s'};
   apply();
 })();
 </script>
