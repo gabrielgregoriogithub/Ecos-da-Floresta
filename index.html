@@ -388,6 +388,42 @@ window.addEventListener('keydown',e=>{
   update=dt=>{readGamepad();baseGamepadUpdate(dt)};
   const padHint=document.createElement('span');padHint.innerHTML='<kbd>Controle</kbd> A atacar · B magia · X esquiva · Y especial';document.querySelector('.below')?.appendChild(padHint);
   const gamepadStyle=document.createElement('style');gamepadStyle.textContent='.below span{white-space:nowrap}@media(max-width:800px){.below span:last-child{display:none}}';document.head.appendChild(gamepadStyle);
+  body.classList.add('visual-premium');
+  const visualStyle=document.createElement('style');
+  visualStyle.textContent=`
+    body.visual-premium{background:radial-gradient(circle at 50% -15%,#244b3b 0,#0d211b 38%,#050d0b 100%);overflow-x:hidden}
+    body.visual-premium:before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.22;background:radial-gradient(ellipse at 18% 20%,#b9d88a22,transparent 34%),radial-gradient(ellipse at 84% 72%,#5fa9a422,transparent 36%);animation:forest-breathe 12s ease-in-out infinite alternate}
+    .visual-premium header{border-bottom-color:#d6c47a24;backdrop-filter:blur(9px)}
+    .visual-premium .brand{filter:drop-shadow(0 0 11px #d5c47b55)}
+    .visual-premium .game{border-color:#a8c78a77;box-shadow:0 18px 75px #000b,0 0 0 1px #e7d58b12,0 0 32px #8fb87518;transition:box-shadow .3s ease}
+    .visual-premium .game:hover{box-shadow:0 22px 90px #000c,0 0 0 1px #e7d58b24,0 0 42px #9dcc7b2b}
+    .visual-premium .panel{background:linear-gradient(145deg,#183329ee,#0d211ce8);border-color:#b4c98c2b;box-shadow:inset 0 1px #ffffff0d,0 8px 24px #0003}
+    .visual-premium .pill{background:#162c22aa;box-shadow:inset 0 1px #fff2,0 0 18px #d4bd6920}
+    .visual-premium button{background:linear-gradient(145deg,#e3ca88,#b89757);box-shadow:inset 0 1px #fff7,0 3px 10px #0003;transition:filter .16s,transform .16s,box-shadow .16s}
+    .visual-premium button:hover{filter:saturate(1.12) brightness(1.1);box-shadow:inset 0 1px #fff9,0 5px 16px #0005}
+    .visual-premium .hud>span{padding:5px 9px;border:1px solid #d6c47a2b;border-radius:10px;background:#061a14a8;backdrop-filter:blur(5px);box-shadow:0 3px 12px #0004}
+    .visual-premium .hud .hearts{color:#ff9d88;text-shadow:0 0 8px #ff775955}
+    .visual-premium .objective{border-color:#d4c77b55!important;background:#071b15c9!important;box-shadow:0 5px 22px #0007,inset 0 1px #fff2!important}
+    @keyframes forest-breathe{from{transform:scale(1);opacity:.17}to{transform:scale(1.06);opacity:.28}}
+    @media(max-width:800px){.visual-premium main{padding-top:14px}.visual-premium .game{border-radius:15px}.visual-premium .panel{box-shadow:0 5px 18px #0005}.visual-premium header{padding-bottom:14px}}
+    @media(prefers-reduced-motion:reduce){.visual-premium:before{animation:none}}
+  `;document.head.appendChild(visualStyle);
+  const premiumDraw=draw;
+  draw=()=>{
+    premiumDraw();
+    if(reducedFX||!p)return;
+    ctx.save();
+    const pulse=.5+.5*Math.sin(t*1.7),low=Math.max(0,1-p.hp/p.max);
+    const tint=biome===0?'#8fda9a':biome===1?'#a9a7e0':'#e7bd75';
+    ctx.globalAlpha=.035+.012*pulse;ctx.fillStyle=tint;ctx.fillRect(0,0,768,528);
+    ctx.globalAlpha=.12;ctx.fillStyle='#d9efae';
+    for(let i=0;i<16;i++){const x=(i*173+Math.sin(t*.22+i)*34)%768,y=(i*91+t*(5+i%3))%420+70;ctx.beginPath();ctx.arc(x,y,1.2+(i%3)*.45,0,Math.PI*2);ctx.fill()}
+    if(low>.45){const danger=.04+low*.06+.035*Math.max(0,Math.sin(t*7));const g=ctx.createRadialGradient(384,264,150,384,264,460);g.addColorStop(0,'#8d1f1b00');g.addColorStop(1,'#9b2b2b'+Math.round(danger*255).toString(16).padStart(2,'0'));ctx.globalAlpha=1;ctx.fillStyle=g;ctx.fillRect(0,0,768,528)}
+    if([4,8].includes(room)&&roomTime<2.8&&state==='play'){
+      const fade=Math.min(1,roomTime*3,(2.8-roomTime)*2);ctx.globalAlpha=Math.max(0,fade*.72);ctx.fillStyle='#020806';ctx.fillRect(0,0,768,42);ctx.fillRect(0,486,768,42);
+    }
+    ctx.restore();
+  };
   apply();
 })();
 </script>
